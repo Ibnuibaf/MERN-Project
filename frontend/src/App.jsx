@@ -10,6 +10,7 @@ import ProfilePage from './pages/ProfilePage'
 import DiariesPage from './pages/DiariesPage'
 import DashboardPage from './pages/DashboardPage'
 import CreatediaryPage from './pages/CreatediaryPage'
+import AdminLoginPage from './pages/AdminLoginPage';
  
 
 function App() {
@@ -24,7 +25,7 @@ function App() {
           <Route path='/profile' element={ <ProfilePage/> } />
           <Route path='/diary' element={ <DiariesPage/> } />
           <Route path='/create' element={ <CreatediaryPage/> } />
-          <Route path='/admin' element={ <DiariesPage/> } />
+          <Route path='/admin' element={ <AdminLoginPage/> } />
           <Route path='/admin/dashboard' element={ <DashboardPage/> } />
         </Routes>
       </BrowserRouter>

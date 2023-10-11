@@ -1,49 +1,75 @@
 import axios from "axios";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import { useDispatch, useSelector } from "react-redux";
-import {
-  signInFailure,
-  signInStart,
-  signInSuccess,
-} from "../redux/user/userSlice";
+import { setCredentials } from "../redux/authSlice";
 
 function Signin() {
+  const { userInfo } = useSelector((state) => state.auth);
+
   const [formData, setFormData] = useState({
     username: "",
     password: "",
   });
 
-  const { loading, error } = useSelector((state) => state.user);
+  const [loading, setLoading] = useState();
+  const [error, setError] = useState();
 
   const direct = useNavigate();
   const dispatch = useDispatch();
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    dispatch(signInStart());
+    setLoading(true);
     try {
+      if (formData.username < 4) {
+        setLoading(false);
+        return toast.error("Enter a Valid Username");
+      }
+      if (formData.password < 4) {
+        setLoading(false);
+        return toast.error("Password should have four charcters ");
+      }
       axios
         .post("http://localhost:3333/login", formData)
         .then((res) => {
-          const userDetails=res.data.userDetails
-          dispatch(signInSuccess(userDetails));
-          console.log(userDetails);
-          toast.success(`${userDetails.username} signed in successfully`)
-          direct("/diary");
+          setLoading(false);
+          localStorage.setItem("token", res.data.token);
+          toast.success(`User signed in successfully`);
+          axios
+            .post("http://localhost:3333/fetch/user-data", {
+              token: localStorage.getItem("token"),
+            })
+            .then((res) => {
+              console.log(res.data);
+              dispatch(setCredentials(res.data));
+              direct("/diary");
+            })
+            .catch((err) => {
+              console.log(err, "hello boss");
+              toast.error("Unable to Render User Details");
+            });
         })
         .catch((err) => {
-          dispatch(signInFailure(err.message));
+          setLoading(false);
+          setError(err);
           console.log(err);
-          toast.error(error);
+          toast.error(error.response.data.message);
         });
     } catch (err) {
-      dispatch(signInFailure(err));
+      setError(err);
       console.log(err);
       toast.error(error);
     }
   };
+
+  useEffect(() => {
+    if (localStorage.userInfo) {
+      direct("/");
+    }
+  }, [direct, userInfo]);
+
   return (
     <div className="bg-slate-800 w-screen h-screen flex justify-center items-center">
       <section className="h-fit w-[50%]  border rounded-md border-spacing-2 p-4">

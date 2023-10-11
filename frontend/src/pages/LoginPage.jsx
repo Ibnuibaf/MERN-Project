@@ -1,7 +1,9 @@
-import React from 'react'
+import React, { useEffect } from 'react'
 import Signin from '../components/Signin'
 
+
 function LoginPage() {
+  
   return (
     <div>
       <Signin/>

@@ -5,7 +5,10 @@ const userSchema=mongoose.Schema({
         type:String,
         required:true
     },
-    profile:String,
+    profile:{
+        type:String,
+        default:'https://res.cloudinary.com/dshijvj8y/image/upload/v1697023211/il7weaukqebxrqbjhhfs.png'
+    },
     email:{
         type:String,
         required:true

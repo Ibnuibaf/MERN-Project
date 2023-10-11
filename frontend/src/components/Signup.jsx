@@ -2,8 +2,6 @@ import axios from "axios";
 import React, { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { ToastContainer, toast } from "react-toastify";
-import { TEInput, TERipple } from "tw-elements-react";
-
 
 function Signup() {
   const [formData, setFormData] = useState({
@@ -12,14 +10,16 @@ function Signup() {
     password: "",
     profile: "",
   });
+
   const [confirmPassword, setConfirmPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
   const direct = useNavigate();
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
+
     function isValidEmail(email) {
       const emailRegex = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4}$/;
       return emailRegex.test(email);
@@ -36,22 +36,51 @@ function Signup() {
     } else {
       setLoading(true);
       try {
+        if (formData.profile) {
+          const profileUpload = new FormData();
+          profileUpload.append("file", formData.profile);
+          profileUpload.append('upload_preset', 'usctrur2');
+
+          try {
+            const response = await axios.post(
+              `https://api.cloudinary.com/v1_1/dshijvj8y/image/upload`,
+              profileUpload,
+              {
+                headers: {
+                  "Content-Type": "multipart/form-data",
+                },
+              }
+            );
+            if (response.status === 200) {
+              setFormData({
+                ...formData,
+                profile: response.data.secure_url,
+              });
+              console.log(response.data.secure_url);
+            } else {
+              console.error("Error uploading image to Cloudinary");
+            }
+          } catch (error) {
+            console.error("Error uploading image:", error);
+          }
+        }
+
         axios
           .post("http://localhost:3333/register", formData)
           .then((res) => {
             setLoading(false);
             if (res.data.err) {
-              setError(res.data.message)
-              toast.error(error)
+              setError(res.data.message);
+              toast.error(error);
             } else {
-              setError(null)
-              toast.success('User Registered SuccessFully')
+              setError(null);
+              toast.success("User Registered SuccessFully");
               direct("/login");
             }
           })
           .catch((err) => {
             setLoading(false);
-            setError(err.message);
+            setError(err.response.data.message);
             toast.error(error);
             console.log(12356564561);
             console.log(err);
@@ -124,6 +153,7 @@ function Signup() {
                 className="form-control my-2"
                 type="file"
                 name="image"
+                accept="image/*"
                 onChange={(e) =>
                   setFormData({ ...formData, profile: e.target.files[0] })
                 }
