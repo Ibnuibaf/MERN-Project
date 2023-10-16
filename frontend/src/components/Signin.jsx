@@ -55,12 +55,12 @@ function Signin() {
           setLoading(false);
           setError(err);
           console.log(err);
-          toast.error(error.response.data.message);
+          toast.error(err.response.data.message);
         });
     } catch (err) {
       setError(err);
       console.log(err);
-      toast.error(error);
+      toast.error(err.response.data.message);
     }
   };
 
